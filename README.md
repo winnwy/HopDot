@@ -1,6 +1,9 @@
 # HopDot
 
-**HopDot** is a Garmin Connect IQ app that helps runners map custom running routes between two locations, passing through required waypoints and matching a target distance. Ideal for runners who want precision in training routes or explore new paths with specific goals in mind.
+HopDot is a web application that helps runners map custom running routes between two locations, passing through required waypoints and matching a target distance. It’s ideal for runners who want precision in training routes or want to explore new paths with specific goals in mind.
+
+🙂 This web version serves as a prototype of the core functionality before full Garmin Connect IQ integration.
+
 
 ---
 
