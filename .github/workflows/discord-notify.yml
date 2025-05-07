@@ -1,0 +1,22 @@
+name: Discord Push Notification (All Branches)
+
+on:
+  push:
+    branches-ignore: [] # Empty means all branches are included
+
+jobs:
+  notify-discord:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Discord Notification
+        uses: Ilshidur/action-discord@master
+        with:
+          args: |
+            🌿 **New Push Detected**
+            **Repository:** ${{ github.repository }}
+            **Branch:** ${GITHUB_REF#refs/heads/}  # Cleans up "refs/heads/" prefix
+            **Pushed by:** ${{ github.actor }}
+            **Commit:** [${GITHUB_SHA:0:7}](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }})
+            **Compare Changes:** [View Diff](${{ github.server_url }}/${{ github.repository }}/compare/${{ github.event.before }}...${{ github.sha }})
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
