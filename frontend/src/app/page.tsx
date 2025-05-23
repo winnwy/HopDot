@@ -1,56 +1,86 @@
 "use client";
-import React from "react";
+import { useRef, useEffect, useState } from "react";
+import mapboxgl from "mapbox-gl";
 
-import {
-  APIProvider,
-  Map,
-  MapCameraChangedEvent,
-} from "@vis.gl/react-google-maps";
-import PoiMarkers from "@/components/PoiMarkers";
+import 'mapbox-gl/dist/mapbox-gl.css';
 
-type Poi = { key: string; location: google.maps.LatLngLiteral };
-const locations: Poi[] = [
-  { key: "operaHouse", location: { lat: -33.8567844, lng: 151.213108 } },
-  { key: "tarongaZoo", location: { lat: -33.8472767, lng: 151.2188164 } },
-  { key: "manlyBeach", location: { lat: -33.8209738, lng: 151.2563253 } },
-  { key: "hyderPark", location: { lat: -33.8690081, lng: 151.2052393 } },
-  { key: "theRocks", location: { lat: -33.8587568, lng: 151.2058246 } },
-  { key: "circularQuay", location: { lat: -33.858761, lng: 151.2055688 } },
-  { key: "harbourBridge", location: { lat: -33.852228, lng: 151.2038374 } },
-  { key: "kingsCross", location: { lat: -33.8737375, lng: 151.222569 } },
-  { key: "botanicGardens", location: { lat: -33.864167, lng: 151.216387 } },
-  { key: "museumOfSydney", location: { lat: -33.8636005, lng: 151.2092542 } },
-  { key: "maritimeMuseum", location: { lat: -33.869395, lng: 151.198648 } },
-  { key: "kingStreetWharf", location: { lat: -33.8665445, lng: 151.1989808 } },
-  { key: "aquarium", location: { lat: -33.869627, lng: 151.202146 } },
-  { key: "darlingHarbour", location: { lat: -33.87488, lng: 151.1987113 } },
-  { key: "barangaroo", location: { lat: -33.8605523, lng: 151.1972205 } },
-];
+const MAP_STYLE = "mapbox://styles/mapbox/streets-v12";
+const INITIAL_CENTER: [number, number] = [-74.0242, 40.6941];
+const INITIAL_ZOOM = 10.12;
 
-export default function Home() {
-  const googleMapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
-  const mapId = process.env.NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID;
+const MapDisplay = () => {
+  const [mapState, setMapState] = useState({
+    center: INITIAL_CENTER,
+    zoom: INITIAL_ZOOM,
+  });
+
+  const mapContainerRef = useRef<HTMLDivElement>(null);
+  const mapRef = useRef<mapboxgl.Map | null>(null);
+
+  // Initialize map and controls
+  useEffect(() => {
+    if (!mapContainerRef.current) return;
+
+    // Set access token
+    mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN || "";
+
+    // Initialize map
+    mapRef.current = new mapboxgl.Map({
+      container: mapContainerRef.current,
+      style: MAP_STYLE,
+      center: mapState.center,
+      zoom: mapState.zoom,
+    });
+
+    // Add controls and event listeners
+    const setupMapControls = () => {
+      if (!mapRef.current) return;
+
+      // Add geolocation control
+      const geolocateControl = new mapboxgl.GeolocateControl({
+        positionOptions: { enableHighAccuracy: true },
+        trackUserLocation: true,
+        showUserHeading: true,
+      });
+      mapRef.current.addControl(geolocateControl);
+
+      // // Auto-locate user on load
+      mapRef.current.on("load", () => {
+        geolocateControl.trigger();
+      });
+
+      // Update state on map movement
+      mapRef.current.on("move", () => {
+        const center = mapRef.current?.getCenter();
+        const zoom = mapRef.current?.getZoom();
+
+        setMapState({
+          center: [
+            center?.lng ?? INITIAL_CENTER[0],
+            center?.lat ?? INITIAL_CENTER[1],
+          ],
+          zoom: zoom ?? INITIAL_ZOOM,
+        });
+      });
+    };
+
+    setupMapControls();
+
+    // Cleanup function
+    return () => {
+      mapRef.current?.remove();
+    };
+  }, []);
+
   return (
-    <APIProvider
-      apiKey={googleMapsApiKey ?? ""}
-      onLoad={() => console.log("Maps API has loaded.")}
-    >
-      <Map
-        className="w-full h-[70vh]"
-        defaultZoom={13}
-        defaultCenter={{ lat: -33.860664, lng: 151.208138 }}
-        mapId={mapId}
-        onCameraChanged={(ev: MapCameraChangedEvent) =>
-          console.log(
-            "camera changed:",
-            ev.detail.center,
-            "zoom:",
-            ev.detail.zoom
-          )
-        }
-      >
-        <PoiMarkers pois={locations} />
-      </Map>
-    </APIProvider>
+    <div className="flex flex-col">
+      <div className="bg-amber-100 p-2">
+        Longitude: {mapState.center[0].toFixed(4)} | Latitude:{" "}
+        {mapState.center[1].toFixed(4)} | Zoom: {mapState.zoom.toFixed(2)}
+      </div>
+      <div ref={mapContainerRef} className="bg-gray-300 w-full h-[500px]" />
+    </div>
   );
-}
+};
+
+export default MapDisplay;
