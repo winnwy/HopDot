@@ -1,6 +1,6 @@
 "use client";
 import { useRef, useEffect } from "react";
-import mapboxgl from "mapbox-gl";
+import * as mapboxgl from "mapbox-gl";
 import MapboxGeocoder from "@mapbox/mapbox-gl-geocoder";
 import { Position } from "@/types/map.types";
 
@@ -21,9 +21,12 @@ const MapControls = ({
   useEffect(() => {
     if (!map) return;
 
+    // Replace with your actual Mapbox access token or use an environment variable
+    const MAPBOX_ACCESS_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN || "";
+
     // Create start position geocoder
     const startGeocoder = new MapboxGeocoder({
-      accessToken: mapboxgl.accessToken,
+      accessToken: MAPBOX_ACCESS_TOKEN,
       mapboxgl: mapboxgl,
       placeholder: "Search for start location...",
     });
@@ -31,7 +34,7 @@ const MapControls = ({
 
     // Create end position geocoder
     const endGeocoder = new MapboxGeocoder({
-      accessToken: mapboxgl.accessToken,
+      accessToken: MAPBOX_ACCESS_TOKEN,
       mapboxgl: mapboxgl,
       placeholder: "Search for end location...",
     });
