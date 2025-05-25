@@ -47,7 +47,7 @@ const PoiMarkers = (props: { pois: Poi[] }) => {
     console.log("marker clicked:", ev.latLng.toString());
     map.panTo(ev.latLng);
     setCircleCenter(ev.latLng);
-  });
+  }, [map]);
 
   return (
     <>
