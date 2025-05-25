@@ -5,8 +5,8 @@ import mapboxgl from "mapbox-gl";
 import 'mapbox-gl/dist/mapbox-gl.css';
 
 const MAP_STYLE = "mapbox://styles/mapbox/streets-v12";
-const INITIAL_CENTER: [number, number] = [-74.0242, 40.6941];
-const INITIAL_ZOOM = 10.12;
+const INITIAL_CENTER: [number, number] = [151.2064, -33.8840]; // For now Sydney City, in the future something else.
+const INITIAL_ZOOM = 5;
 
 const MapDisplay = () => {
   const [mapState, setMapState] = useState({
@@ -70,15 +70,16 @@ const MapDisplay = () => {
     return () => {
       mapRef.current?.remove();
     };
-  }, []);
+  }, [mapState.center, mapState.zoom]);
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col h-screen">
       <div className="bg-amber-100 p-2">
         Longitude: {mapState.center[0].toFixed(4)} | Latitude:{" "}
         {mapState.center[1].toFixed(4)} | Zoom: {mapState.zoom.toFixed(2)}
       </div>
-      <div ref={mapContainerRef} className="bg-gray-300 w-full h-[500px]" />
+      <div ref={mapContainerRef} className="bg-gray-300 w-full h-full" /> 
+      {/* original h-500px */}
     </div>
   );
 };
