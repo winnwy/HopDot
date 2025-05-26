@@ -22,7 +22,7 @@ const MapDisplay = () => {
   };
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col h-full">
       {/* Coordinates display */}
       <CoordinatesDisplay
         mapState={mapState}
@@ -38,7 +38,7 @@ const MapDisplay = () => {
       />
 
       {/* Map container */}
-      <div ref={mapContainerRef} className="bg-gray-300 w-full h-[500px]" />
+      <div ref={mapContainerRef} className="bg-gray-300 w-full flex-1" />
     </div>
   );
 };
