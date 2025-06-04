@@ -11,7 +11,7 @@
   "dependencies": {
     "@googlemaps/markerclusterer": "^2.5.3",
     "@mapbox/mapbox-gl-geocoder": "^5.0.3",
-    "@mapbox/search-js-react": "^1.0.0",
+    "@mapbox/search-js-react": "^1.1.0",
     "@vis.gl/react-google-maps": "^1.5.2",
     "mapbox-gl": "^3.12.0",
     "next": "15.3.2",
