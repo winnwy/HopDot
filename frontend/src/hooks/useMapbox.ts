@@ -67,6 +67,7 @@ export const useMapbox = () => {
   }, []);
 
   return {
+    accessToken:mapboxgl.accessToken,
     mapContainerRef,
     mapRef: mapRef.current,
     mapState,
