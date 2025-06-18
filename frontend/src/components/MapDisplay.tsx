@@ -16,13 +16,13 @@ const MapDisplay = () => {
   const { accessToken, mapContainerRef, mapRef, mapState } = useMapbox();
 
   //TODO: Instead of using string values, get the location lat, log, to set start and end position.
-  // const handleStartPositionSelect = (position: Position) => {
-  //   setStartPosition(position);
-  // };
+  const handleStartPositionSelect = (position: Position) => {
+    setStartPosition(position);
+  };
 
-  // const handleEndPositionSelect = (position: Position) => {
-  //   setEndPosition(position);
-  // };
+  const handleEndPositionSelect = (position: Position) => {
+    setEndPosition(position);
+  };
 
   return (
     <>

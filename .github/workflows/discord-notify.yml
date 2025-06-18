@@ -3,6 +3,9 @@ name: Discord Push Notification
 on:
   push:
     branches-ignore: [] # Optional; this includes all branches
+  schedule:
+    - cron: "0 14 * * *" # Run every day at midnight AEST
+  workflow_dispatch: # Optional manual trigger
 
 jobs:
   notify-discord:
@@ -11,16 +14,46 @@ jobs:
       - name: Extract branch name
         shell: bash
         run: echo "BRANCH_NAME=${GITHUB_REF#refs/heads/}" >> "$GITHUB_ENV"
-        
+
       - name: Extract short SHA
         shell: bash
         run: echo "SHORT_SHA=${GITHUB_SHA:0:7}" >> "$GITHUB_ENV"
-        
+
       - name: Send Discord Notification
         uses: Ilshidur/action-discord@master
         with:
           args: |
             😊 **${{ github.actor }}** pushed to `${{ env.BRANCH_NAME }}`  
             🔗 [View Commit `#${{ env.SHORT_SHA }}`](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }})
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
+
+  notify-on-inactivity:
+    if: github.event_name != 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout default branch
+        uses: actions/checkout@v4
+        with:
+          ref: main # Change this if your default branch is not `main`
+
+      - name: Check last commit date
+        id: check
+        run: |
+          LAST_COMMIT_DATE=$(git log -1 --format=%ct)
+          NOW=$(date +%s)
+          DIFF=$(( (NOW - LAST_COMMIT_DATE) / 86400 ))
+          echo "Last commit was $DIFF days ago"
+          echo "days_since_last_commit=$DIFF" >> $GITHUB_OUTPUT
+
+      - name: Notify Discord if inactive for 2+ days
+        if: steps.check.outputs.days_since_last_commit >= 2
+        uses: Ilshidur/action-discord@master
+        with:
+          args: |
+            BIDUBIDUBIDU 🚨
+            ⚠️ No updates in the repository `${{ github.repository }}` for over 2 days!
+            📅 Last commit was **${{ steps.check.outputs.days_since_last_commit }}** days ago.
+            ![lanxiaolansmile](https://i.postimg.cc/MHC9Tcc8/lxlsmile.png)
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
