@@ -29,7 +29,6 @@ jobs:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
 
   notify-on-inactivity:
-    if: github.event_name != 'push'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout default branch
