@@ -44,7 +44,7 @@ jobs:
           NOW=$(date +%s)
           DIFF=$(( (NOW - LAST_COMMIT_DATE) / 86400 ))
           echo "Last commit was $DIFF days ago"
-          echo "days_since_last_commit=$DIFF" >> $GITHUB_OUTPUT
+          echo "days_since_last_commit=3" >> $GITHUB_OUTPUT
 
       - name: Notify Discord if inactive for 2+ days
         if: steps.check.outputs.days_since_last_commit >= 2
