@@ -53,6 +53,6 @@ jobs:
             BIDUBIDUBIDU 🚨
             ⚠️ No updates in the repository `${{ github.repository }}` for over 2 days!
             📅 Last commit was **${{ steps.check.outputs.days_since_last_commit }}** days ago.
-            https://i.postimg.cc/MHC9Tcc8/lxlsmile.png
+            [lanxiaolansmile](https://i.postimg.cc/MHC9Tcc8/lxlsmile.png)
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
