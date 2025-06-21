@@ -3,7 +3,21 @@ import "mapbox-gl/dist/mapbox-gl.css";
 import { useMapbox } from "../hooks/useMapbox";
 
 const MapDisplay = () => {
-  const { mapContainerRef } = useMapbox();
+  const [startPosition, setStartPosition] = useState<Position | null>(null);
+  const [endPosition, setEndPosition] = useState<Position | null>(null);
+  const [startValue, setStartValue] = useState("");
+  const [endValue, setEndValue] = useState("");
+
+  const { accessToken, mapContainerRef, mapRef, mapState } = useMapbox();
+
+  //TODO: Instead of using string values, get the location lat, log, to set start and end position.
+  const handleStartPositionSelect = (position: Position) => {
+    setStartPosition(position);
+  };
+
+  const handleEndPositionSelect = (position: Position) => {
+    setEndPosition(position);
+  };
 
   return (
     <>
