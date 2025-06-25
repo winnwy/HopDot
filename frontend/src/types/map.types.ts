@@ -1,11 +1,13 @@
 export type Position = {
-    coordinates: [number, number];
-    address: string;
-}
+  coordinates: [number, number];
+  address: string;
+};
+
+export type LngLat = [number, number];
 
 export type MapState = {
-    center: [number, number];
-    zoom: number;
+  center: [number, number];
+  zoom: number;
 };
 
 export const MAP_STYLE = "mapbox://styles/mapbox/streets-v12";
