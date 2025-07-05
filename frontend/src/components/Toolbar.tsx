@@ -12,7 +12,7 @@ const Toolbar = () => {
   const [endValue, setEndValue] = useState("");
   const { accessToken, mapRef, mapState } = useMapbox();
   //TODO: Instead of using string values, get the location lat, log, to set start and end position.
-  // const handleStartPositionSelect = (position: Position) => {
+  const handleStartPositionSelect = (position: Position) => {
   //   setStartPosition(position);
   // };
 

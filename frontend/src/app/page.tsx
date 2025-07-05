@@ -1,7 +1,7 @@
 "use client";
 
 import RunPlanner from "@/components/RunPlanner";
-import Toolbar from "@/components/Toolbar";
+import { Toolbar } from "@/components/Toolbar";
 
 export default function Home() {
   const date = new Date();
@@ -24,4 +24,8 @@ export default function Home() {
       </footer>
     </main>
   );
+}
+
+export function Toolbar() {
+  // Toolbar implementation
 }

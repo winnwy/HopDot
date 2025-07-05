@@ -4,7 +4,7 @@ on:
   push:
     branches-ignore: [] # Optional; this includes all branches
   schedule:
-    - cron: "0 14 * * *" # Run every day at midnight AEST
+    - cron: "35 13 * * *" # Run every day at midnight AEST (delayed due to consistent 25 minutes delay)
   workflow_dispatch: # Optional manual trigger
 
 jobs:
