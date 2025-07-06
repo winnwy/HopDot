@@ -6,12 +6,15 @@ import CoordinatesDisplay from "./CoordinatesDisplay";
 import SearchBoxComponent from "./SearchBoxComponent";
 import mapboxgl from "mapbox-gl";
 import { LngLat } from "../types/map.types";
+import { LineString } from 'geojson';
 
 const MapDisplay = () => {
   const [points, setPoints] = useState<LngLat[]>([]);
   const [markers, setMarkers] = useState<mapboxgl.Marker[]>([]);
   const [routeId, setRouteId] = useState<string | null>(null);
   const [showRoute, setShowRoute] = useState(false);
+  const [routeGeoJson, setRouteGeoJson] = useState<LineString | null>(null);
+  const [routeProfile, setRouteProfile] = useState<'walking' | 'cycling'>('walking');
 
   const [searchValue, setSearchValue] = useState("");
   const selectedCoordsRef = useRef<LngLat | null>(null);
@@ -42,8 +45,33 @@ const MapDisplay = () => {
     setShowRoute(false);
   };
 
-  const handleGenerateRoute = () => {
+  // Fetch snapped route from Mapbox Directions API
+  const fetchSnappedRoute = async (points: LngLat[]): Promise<LineString | null> => {
+    if (!accessToken || points.length < 2) return null;
+    const coords = points.map((p) => p.join(",")).join(";");
+    const url = `https://api.mapbox.com/directions/v5/mapbox/${routeProfile}/${coords}?geometries=geojson&access_token=${accessToken}`;
+    try {
+      const res = await fetch(url);
+      const data = await res.json();
+      if (data.routes && data.routes[0] && data.routes[0].geometry) {
+        return data.routes[0].geometry as LineString;
+      }
+    } catch (e) {
+      console.error("Directions API error", e);
+    }
+    return null;
+  };
+
+  const handleGenerateRoute = async () => {
     setShowRoute(true);
+    if (points.length < 2) return;
+    const snapped = await fetchSnappedRoute(points);
+    if (snapped) {
+      setRouteGeoJson(snapped);
+    } else {
+      // fallback to straight line
+      setRouteGeoJson({ type: "LineString", coordinates: points });
+    }
   };
 
   useEffect(() => {
@@ -53,17 +81,14 @@ const MapDisplay = () => {
       mapRef.removeLayer(routeId);
       mapRef.removeSource(routeId);
     }
-    if (showRoute && points.length >= 2) {
+    if (showRoute && points.length >= 2 && routeGeoJson) {
       const id = `route-${Date.now()}`;
       setRouteId(id);
       mapRef.addSource(id, {
         type: "geojson",
         data: {
           type: "Feature",
-          geometry: {
-            type: "LineString",
-            coordinates: points,
-          },
+          geometry: routeGeoJson,
           properties: {},
         },
       });
@@ -84,8 +109,9 @@ const MapDisplay = () => {
       mapRef.removeLayer(routeId);
       mapRef.removeSource(routeId);
       setRouteId(null);
+      setRouteGeoJson(null);
     }
-  }, [showRoute, points, mapRef]);
+  }, [showRoute, points, mapRef, routeGeoJson, routeId]);
 
   useEffect(() => {
     if (!mapRef) return;
@@ -132,12 +158,64 @@ const MapDisplay = () => {
     setMarkers(newMarkers.filter((m): m is mapboxgl.Marker => m !== null));
   }, [points, mapRef, markers]);
 
+  // Export waypoints as GeoJSON
+  const handleExportWaypoints = () => {
+    const geojson = {
+      type: "FeatureCollection",
+      features: points.map((coords, i) => ({
+        type: "Feature",
+        geometry: { type: "Point", coordinates: coords },
+        properties: { index: i }
+      }))
+    };
+    const blob = new Blob([JSON.stringify(geojson, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "waypoints.geojson";
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  // Export map as image
+  const handleExportImage = () => {
+    if (!mapRef) return;
+    const dataUrl = mapRef.getCanvas().toDataURL("image/png");
+    const a = document.createElement("a");
+    a.href = dataUrl;
+    a.download = "map.png";
+    a.click();
+  };
+
   return (
     <>
       <div className="flex flex-col space-y-4 p-4">
         {/* Control Panel */}
         <div className="bg-white p-4 rounded-md shadow-md">
           <CoordinatesDisplay mapState={mapState} points={points} />
+          <div className="flex items-center space-x-2 mb-2">
+            <label className="font-semibold">Route Type:</label>
+            <select
+              value={routeProfile}
+              onChange={e => setRouteProfile(e.target.value as 'walking' | 'cycling')}
+              className="border rounded px-2 py-1"
+            >
+              <option value="walking">Walking</option>
+              <option value="cycling">Cycling</option>
+            </select>
+            <button
+              onClick={handleExportWaypoints}
+              className="ml-4 bg-green-500 hover:bg-green-600 text-white font-bold py-1 px-3 rounded"
+            >
+              Export Waypoints
+            </button>
+            <button
+              onClick={handleExportImage}
+              className="bg-purple-500 hover:bg-purple-600 text-white font-bold py-1 px-3 rounded"
+            >
+              Export Image
+            </button>
+          </div>
           <div className="flex items-center space-x-2">
             <div className="flex items-center space-x-2">
               {mapRef && (

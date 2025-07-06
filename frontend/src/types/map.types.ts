@@ -11,5 +11,5 @@ export type MapState = {
 };
 
 export const MAP_STYLE = "mapbox://styles/mapbox/streets-v12";
-export const INITIAL_CENTER: [number, number] = [-74.0242, 40.6941];
+export const INITIAL_CENTER: [number, number] = [151.2093, -33.8688];
 export const INITIAL_ZOOM = 10.12;
