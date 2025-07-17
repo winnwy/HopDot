@@ -6,7 +6,7 @@ import CoordinatesDisplay from "./CoordinatesDisplay";
 import SearchBoxComponent from "./SearchBoxComponent";
 import mapboxgl from "mapbox-gl";
 import { LngLat } from "../types/map.types";
-import { LineString } from 'geojson';
+import { LineString } from "geojson";
 
 const MapDisplay = () => {
   const [points, setPoints] = useState<LngLat[]>([]);
@@ -14,7 +14,9 @@ const MapDisplay = () => {
   const [routeId, setRouteId] = useState<string | null>(null);
   const [showRoute, setShowRoute] = useState(false);
   const [routeGeoJson, setRouteGeoJson] = useState<LineString | null>(null);
-  const [routeProfile, setRouteProfile] = useState<'walking' | 'cycling'>('walking');
+  const [routeProfile, setRouteProfile] = useState<"walking" | "cycling">(
+    "walking"
+  );
 
   const [searchValue, setSearchValue] = useState("");
   const selectedCoordsRef = useRef<LngLat | null>(null);
@@ -46,7 +48,9 @@ const MapDisplay = () => {
   };
 
   // Fetch snapped route from Mapbox Directions API
-  const fetchSnappedRoute = async (points: LngLat[]): Promise<LineString | null> => {
+  const fetchSnappedRoute = async (
+    points: LngLat[]
+  ): Promise<LineString | null> => {
     if (!accessToken || points.length < 2) return null;
     const coords = points.map((p) => p.join(",")).join(";");
     const url = `https://api.mapbox.com/directions/v5/mapbox/${routeProfile}/${coords}?geometries=geojson&access_token=${accessToken}`;
@@ -165,10 +169,12 @@ const MapDisplay = () => {
       features: points.map((coords, i) => ({
         type: "Feature",
         geometry: { type: "Point", coordinates: coords },
-        properties: { index: i }
-      }))
+        properties: { index: i },
+      })),
     };
-    const blob = new Blob([JSON.stringify(geojson, null, 2)], { type: "application/json" });
+    const blob = new Blob([JSON.stringify(geojson, null, 2)], {
+      type: "application/json",
+    });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -180,7 +186,16 @@ const MapDisplay = () => {
   // Export map as image
   const handleExportImage = () => {
     if (!mapRef) return;
-    const dataUrl = mapRef.getCanvas().toDataURL("image/png");
+
+    const canvas = mapRef.getCanvas();
+    console.log("Canvas dimensions:", canvas.width, canvas.height); // Debug
+
+    if (canvas.width === 0 || canvas.height === 0) {
+      console.error("Canvas has zero dimensions");
+      return;
+    }
+
+    const dataUrl = canvas.toDataURL("image/png");
     const a = document.createElement("a");
     a.href = dataUrl;
     a.download = "map.png";
@@ -197,7 +212,9 @@ const MapDisplay = () => {
             <label className="font-semibold">Route Type:</label>
             <select
               value={routeProfile}
-              onChange={e => setRouteProfile(e.target.value as 'walking' | 'cycling')}
+              onChange={(e) =>
+                setRouteProfile(e.target.value as "walking" | "cycling")
+              }
               className="border rounded px-2 py-1"
             >
               <option value="walking">Walking</option>
