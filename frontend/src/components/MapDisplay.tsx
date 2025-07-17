@@ -183,7 +183,7 @@ const MapDisplay = () => {
     URL.revokeObjectURL(url);
   };
 
-  // Export map as image
+  // TODO: Export map as image
   const handleExportImage = () => {
     if (!mapRef) return;
 
