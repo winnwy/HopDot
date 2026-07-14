@@ -1,7 +1,8 @@
 import os
 import httpx
 
-ORS_URL = "https://api.openrouteservice.org/v2/directions/foot-walking/geojson"
+# Old api.openrouteservice.org URL is deprecated (shuts off 2026-08-24); use api.heigit.org.
+ORS_URL = "https://api.heigit.org/openrouteservice/v2/directions/foot-walking/geojson"
 
 class OrsError(Exception):
     def __init__(self, status: int, detail: str):
