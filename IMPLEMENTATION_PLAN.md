@@ -139,7 +139,7 @@ frontend/src/
 ## 3. Milestones with tasks and acceptance criteria
 
 ### M0 — Foundation cleanup (frontend)
-1. `npm uninstall @vis.gl/react-google-maps @googlemaps/markerclusterer`
+1. `npm uninstall @vis.gl/react-google-maps @googlemaps/markerclusterer next-intl` (English-only MVP; i18n deliberately removed)
 2. In `useMapbox.ts`, add `preserveDrawingBuffer: true` to the `new mapboxgl.Map({...})` options.
 3. Fix the marker infinite loop: markers move to `useMarkers.ts` (snippet §4.6) — instances held in a `useRef`, effect depends only on `points`; remove all `console.log` debug lines.
 4. Fix GeoJSON export: features must be `"type": "Feature"`.
@@ -608,7 +608,12 @@ Required cases in `tests/test_engine.py`:
 
 ## 6. Deployment
 
-### 6.1 Backend — Render (`backend/render.yaml`)
+### 6.1 Backend — Render **free tier** (`backend/render.yaml`)
+
+Decision: free tier is accepted for the MVP — the service spins down when idle
+and the first request after ~15 min takes 30–60 s to cold-start. The frontend
+must therefore show a patient loading state on Generate (M3) rather than a
+short timeout: keep the client-side fetch timeout ≥ 90 s.
 ```yaml
 services:
   - type: web
@@ -659,6 +664,12 @@ jobs:
 ---
 
 ## 7. Execution order and handoff notes
+
+Locked decisions (2026-07-14, confirmed by the maintainer):
+- All milestone branches start from `main`; local `dev-mapdisplay` edits are superseded.
+- Default map fallback center and spike test coordinates: Sydney.
+- `next-intl` removed in M0 — English-only MVP.
+- Backend on Render **free tier** (cold starts accepted; see §6.1).
 
 - M0 and M2 are independent — they can run as parallel agents. M1 depends on M0; M3 depends on M1 + M2; M4 depends on M3.
 - M2's spike (§5.1) is the go/no-go gate for the whole algorithm approach. Run it before writing engine tests.
