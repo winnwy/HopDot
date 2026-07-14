@@ -29,6 +29,7 @@ export const useMapbox = () => {
       style: MAP_STYLE,
       center: mapState.center,
       zoom: mapState.zoom,
+      preserveDrawingBuffer: true,
     });
 
     const map = mapRef.current;
