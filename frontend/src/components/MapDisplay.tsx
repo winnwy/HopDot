@@ -1,16 +1,16 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import "@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { useMapbox } from "../hooks/useMapbox";
+import { useMarkers } from "../hooks/useMarkers";
 import CoordinatesDisplay from "./CoordinatesDisplay";
 import SearchBoxComponent from "./SearchBoxComponent";
 import mapboxgl from "mapbox-gl";
-import { LngLat } from "../types/map.types";
+import { LngLat } from "../types/route.types";
 import { LineString } from "geojson";
 
 const MapDisplay = () => {
   const [points, setPoints] = useState<LngLat[]>([]);
-  const [markers, setMarkers] = useState<mapboxgl.Marker[]>([]);
   const [routeId, setRouteId] = useState<string | null>(null);
   const [showRoute, setShowRoute] = useState(false);
   const [routeGeoJson, setRouteGeoJson] = useState<LineString | null>(null);
@@ -125,42 +125,15 @@ const MapDisplay = () => {
     };
   }, [mapRef]);
 
-  useEffect(() => {
-    markers.forEach((marker) => marker.remove());
-    const newMarkers = points.map((point, index) => {
-      let color = "#3498db";
-      if (index === 0) {
-        color = "#2ecc71";
-      }
-      if (index === points.length - 1 && points.length > 1) {
-        color = "#e74c3c";
-      }
-
-      // Debug: Log the coordinates and check if they are within the map bounds
-      if (mapRef && mapRef.getBounds) {
-        const bounds = mapRef.getBounds();
-        const inBounds = bounds
-          ? bounds.contains(point as [number, number])
-          : false;
-        console.log(
-          `Marker #${index}:`,
-          point,
-          `(lng, lat)`,
-          `In map bounds:`,
-          inBounds
-        );
-      } else {
-        console.log(`Marker #${index}:`, point, "(lng, lat)");
-      }
-
-      return mapRef
-        ? new mapboxgl.Marker({ color, scale: 0.8 })
-            .setLngLat(point)
-            .addTo(mapRef)
-        : null;
+  const handleMarkerDrag = useCallback((index: number, point: LngLat) => {
+    setPoints((currentPoints) => {
+      const next = [...currentPoints];
+      next[index] = point;
+      return next;
     });
-    setMarkers(newMarkers.filter((m): m is mapboxgl.Marker => m !== null));
-  }, [points, mapRef, markers]);
+  }, []);
+
+  useMarkers(mapRef, points, handleMarkerDrag);
 
   // Export waypoints as GeoJSON
   const handleExportWaypoints = () => {
@@ -188,7 +161,6 @@ const MapDisplay = () => {
     if (!mapRef) return;
 
     const canvas = mapRef.getCanvas();
-    console.log("Canvas dimensions:", canvas.width, canvas.height); // Debug
 
     if (canvas.width === 0 || canvas.height === 0) {
       console.error("Canvas has zero dimensions");
