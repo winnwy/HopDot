@@ -23,7 +23,8 @@ Follow this document literally. If reality contradicts it (API changed, dependen
 
 - Sign up at https://openrouteservice.org/dev → free API key. Free tier ≈ 40 req/min, 2,000 req/day (verify in dashboard).
 - Single endpoint used for both operations:
-  `POST https://api.openrouteservice.org/v2/directions/foot-walking/geojson`
+  `POST https://api.heigit.org/openrouteservice/v2/directions/foot-walking/geojson`
+  (NOTE: the old `api.openrouteservice.org` base was deprecated 2026-04-28 and shuts off 2026-08-24 — do not use it; it returns 403.)
   Headers: `Authorization: <ORS_API_KEY>`, `Content-Type: application/json`.
 
 **A. Waypoint routing** (start → waypoints… → end):
@@ -212,7 +213,8 @@ class RouteResponse(BaseModel):
 import os
 import httpx
 
-ORS_URL = "https://api.openrouteservice.org/v2/directions/foot-walking/geojson"
+# api.openrouteservice.org is deprecated (shut-off 2026-08-24) - use api.heigit.org
+ORS_URL = "https://api.heigit.org/openrouteservice/v2/directions/foot-walking/geojson"
 
 class OrsError(Exception):
     def __init__(self, status: int, detail: str):
