@@ -6,7 +6,7 @@ import {
   INITIAL_CENTER,
   INITIAL_ZOOM,
   MapState,
-} from "../types/map.types";
+} from "../lib/mapConfig";
 
 export const useMapbox = () => {
   const [mapState, setMapState] = useState<MapState>({
