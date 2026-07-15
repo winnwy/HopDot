@@ -1,18 +1,33 @@
-from fastapi import FastAPI
+import os
+from contextlib import asynccontextmanager
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from models import RouteRequest, RouteResponse
+from services.ors_client import OrsClient, OrsError
+from engine.ors import OrsEngine
 
-# Allow CORS for frontend (replace with your Vercel URL later)
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    app.state.engine = OrsEngine(OrsClient())
+    yield
+    await app.state.engine.ors.aclose()
+
+app = FastAPI(title="HopDot API", lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Temporary for testing
-    allow_methods=["*"],
+    allow_origins=[os.environ.get("ALLOWED_ORIGIN", "http://localhost:3000")],
+    allow_methods=["POST", "GET"],
     allow_headers=["*"],
 )
 
-@app.get("/")
-def read_root():
-    return {"message": "Hello from HopDot Backend!"}
+@app.get("/api/health")
+def health():
+    return {"status": "ok"}
 
-@app.get("/api/test")
-def test_endpoint():
-    return {"status": "OK", "data": "Backend connected successfully!"}
+@app.post("/api/route", response_model=RouteResponse)
+async def create_route(req: RouteRequest):
+    try:
+        return await app.state.engine.generate(req)
+    except OrsError as e:
+        raise HTTPException(status_code=429 if e.status == 429 else 502,
+                            detail=str(e))
