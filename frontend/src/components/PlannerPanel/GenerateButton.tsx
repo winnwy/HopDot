@@ -1,6 +1,6 @@
 "use client";
-import { planToPoints } from "../../hooks/useRoutePlan";
-import { haversineRouteKm } from "../../lib/geo";
+import { useState } from "react";
+import { generateRoute } from "../../lib/api";
 import type { GeneratedRoute, RoutePlan } from "../../types/route.types";
 
 interface GenerateButtonProps {
@@ -8,37 +8,50 @@ interface GenerateButtonProps {
   onGenerated: (route: GeneratedRoute) => void;
 }
 
-/**
- * M1 STUB: draws a straight line through the plan's points and sums
- * haversine distance. Real ORS-backed generation (§1.3 of
- * IMPLEMENTATION_PLAN.md) lands in M3 via lib/api.ts — this button will be
- * rewired to call generateRoute() then.
- */
 const GenerateButton = ({ plan, onGenerated }: GenerateButtonProps) => {
-  const points = planToPoints(plan);
-  const canGenerate = points.length >= 2;
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleGenerate = () => {
-    if (!canGenerate) {
+  const canGenerate =
+    plan.start !== null &&
+    plan.targetKm > 0 &&
+    (plan.mode !== "p2p" || plan.end !== null);
+
+  const handleGenerate = async () => {
+    if (!canGenerate || isLoading) return;
+    setIsLoading(true);
+    setError(null);
+    try {
+      const route = await generateRoute(plan);
+      onGenerated(route);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Route generation failed.");
       onGenerated(null);
-      return;
+    } finally {
+      setIsLoading(false);
     }
-    onGenerated({
-      geometry: { type: "LineString", coordinates: points },
-      distanceKm: haversineRouteKm(points),
-      withinTolerance: false,
-      warnings: ["stub: straight-line distance, not road-network snapped (M3 will replace this)"],
-    });
   };
 
   return (
-    <button
-      onClick={handleGenerate}
-      disabled={!canGenerate}
-      className="w-full bg-blue-500 hover:bg-blue-600 disabled:opacity-50 text-white font-bold py-2 px-4 rounded"
-    >
-      Generate
-    </button>
+    <div className="flex flex-col gap-1">
+      <button
+        onClick={handleGenerate}
+        disabled={!canGenerate || isLoading}
+        className="w-full bg-blue-500 hover:bg-blue-600 disabled:opacity-50 text-white font-bold py-2 px-4 rounded"
+      >
+        {isLoading ? "Generating…" : "Generate"}
+      </button>
+      {isLoading && (
+        <p className="text-xs text-gray-500">
+          This can take a minute on first use while the route service wakes up.
+        </p>
+      )}
+      {error && (
+        <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded px-2 py-1">
+          {error}
+        </div>
+      )}
+    </div>
   );
 };
 
