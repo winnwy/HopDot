@@ -19,7 +19,7 @@ const PlannerPanel = ({ plan, dispatch, map, onGenerated }: PlannerPanelProps) =
   const handleAdd = (point: LngLat) => dispatch({ type: "addPoint", point });
 
   return (
-    <div className="flex flex-col gap-3 p-4 bg-white rounded-md shadow-md w-full md:w-80">
+    <div className="flex flex-col gap-3 w-full md:p-4 md:bg-white md:rounded-md md:shadow-md md:w-80">
       <SearchBox map={map} onAdd={handleAdd} />
       <PointList plan={plan} dispatch={dispatch} />
       <ModeToggle plan={plan} dispatch={dispatch} />

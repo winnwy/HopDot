@@ -34,6 +34,17 @@ export const useMapbox = () => {
 
     const map = mapRef.current;
 
+    // `mapRef` is a plain ref: mutating it doesn't trigger a re-render, so
+    // consumers reading the hook's returned `mapRef.current` (e.g. MapCanvas,
+    // which attaches click/drag handlers) would only ever see it once some
+    // unrelated state update happened to re-render this hook's caller. That
+    // previously only occurred incidentally via the "move" listener below
+    // (e.g. once GeolocateControl.trigger() panned the map) — if geolocation
+    // permission was denied and the user's first action was a map click, the
+    // click handler was never attached. Force one re-render right after
+    // construction so the map reference is reliably picked up.
+    setMapState((s) => ({ ...s }));
+
     // Add geolocation control
     const geolocateControl = new mapboxgl.GeolocateControl({
       positionOptions: { enableHighAccuracy: true },

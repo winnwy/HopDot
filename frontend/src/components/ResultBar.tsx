@@ -38,7 +38,7 @@ const ResultBar = ({ generatedRoute, targetKm }: ResultBarProps) => {
     <div className="flex flex-col gap-2 p-3 bg-white rounded-md shadow-md">
       <div className="flex items-center gap-4">
         {generatedRoute ? (
-          <span className="text-sm">
+          <span className="text-sm" data-testid="result-distance">
             {generatedRoute.distanceKm.toFixed(2)} km of {targetKm} km
             {generatedRoute.withinTolerance ? (
               <span className="ml-2 inline-block bg-green-100 text-green-700 text-xs font-semibold px-2 py-0.5 rounded-full">

@@ -51,6 +51,7 @@ const MapCanvas = ({ plan, dispatch, generatedRoute, onMapReady }: MapCanvasProp
   return (
     <div
       ref={mapContainerRef}
+      data-testid="map-canvas"
       className="w-full h-full min-h-[400px] bg-gray-300 rounded-md shadow-md"
     />
   );
